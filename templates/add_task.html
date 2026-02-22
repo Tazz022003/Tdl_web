@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Add Task</h2>
+<form method="POST">
+    <input type="text" name="name" placeholder="Task Name" required class="form-control mt-2">
+    <select name="category" class="form-control mt-2">
+        <option>Work</option>
+        <option>School</option>
+        <option>Personal</option>
+    </select>
+    <select name="priority" class="form-control mt-2">
+        <option>low</option>
+        <option>Medium</option>
+        <option>High</option>
+    </select>
+    <input type="date" name="due_date" class="form-control mt-2" required>
+    <input type="time" name="due_time" class="form-control mt-2" required>
+    <button type="submit" class="btn btn-primary mt-3">Add Task</button>
+</form>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+
+{% endblock %}

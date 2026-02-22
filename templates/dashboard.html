@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Dashboard</h2>
+<a href="{{ url_for('add_task') }}" class="btn btn-success mb-3">Add New Task</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Task</th>
+    <th>Category</th>
+    <th>Priority</th>
+    <th>Due Date</th>
+    <th>Due Time</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+
+{% for task in tasks %}
+<tr class="{% if task.status=='Done' %}table-success{% endif %}">
+    <td>{{ task.name }}</td>
+    <td>{{ task.category }}</td>
+    <td>{{ task.priority }}</td>
+    <td>{{ task.due_date }}</td>
+    <td>{{ task.due_time }}</td>
+    <td>{{ task.status }}</td>
+    <td>
+        {% if task.status=='Pending' %}
+        <a href="{{ url_for('done', task_id=task.id) }}" class="btn btn-sm btn-success">✔ Done</a>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
