@@ -1,2 +1,34 @@
-if task_time < today:
-    overdue_tasks.append(task)
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Overdue Tasks</h2>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+
+<table class="table table-bordered table-danger">
+<tr>
+    <th>Task</th>
+    <th>Category</th>
+    <th>Priority</th>
+    <th>Due Date</th>
+    <th>Due Time</th>
+</tr>
+
+{% for task in tasks %}
+<tr>
+    <td>{{ task.name }}</td>
+    <td>{{ task.category }}</td>
+    <td>{{ task.priority }}</td>
+    <td>{{ task.due_date }}</td>
+    <td>{{ task.due_time }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% if tasks|length == 0 %}
+<p>No overdue tasks 🎉</p>
+<p> Nice G natapos mo din sa wakas!!!!</p>
+{% endif %}
+
+{% endblock %}

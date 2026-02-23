@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Edit Task</h2>
+
+<form method="POST">
+
+    <div class="mb-3">
+        <label>Task Name</label>
+        <input type="text" name="name" class="form-control" value="{{ task.name }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Category</label>
+        <input type="text" name="category" class="form-control" value="{{ task.category }}">
+    </div>
+
+    <div class="mb-3">
+        <label>Priority</label>
+        <select name="priority" class="form-control">
+            <option {% if task.priority=='Low' %}selected{% endif %}>Low</option>
+            <option {% if task.priority=='Medium' %}selected{% endif %}>Medium</option>
+            <option {% if task.priority=='High' %}selected{% endif %}>High</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Due Date</label>
+        <input type="date" name="due_date" class="form-control" value="{{ task.due_date }}">
+    </div>
+
+    <div class="mb-3">
+        <label>Due Time</label>
+        <input type="time" name="due_time" class="form-control" value="{{ task.due_time }}">
+    </div>
+
+    <button type="submit" class="btn btn-success">Update</button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+
+</form>
+
+{% endblock %}

@@ -2,6 +2,8 @@
 from flask import Flask
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask import render_template, request, redirect, url_for
+from datetime import datetime
+from flask import request
 import sqlite3
 
 
@@ -71,17 +73,92 @@ def done(task_id):
     conn.close()
     return redirect(url_for("dashboard"))
 
+@app.route("/delete/<int:task_id>")
+@login_required
+def delete(task_id):
+    conn = sqlite3.connect("database.db")
+
+    conn.execute("""
+        DELETE FROM tasks
+        WHERE id=? AND user_id=?
+    """, (task_id, current_user.id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("dashboard"))
+
+@app.route("/edit/<int:task_id>", methods=["GET", "POST"])
+@login_required
+def edit(task_id):
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+
+    if request.method == "POST":
+        name = request.form["name"]
+        category = request.form["category"]
+        priority = request.form["priority"]
+        due_date = request.form["due_date"]
+        due_time = request.form["due_time"]
+
+        conn.execute("""
+            UPDATE tasks
+            SET name=?, category=?, priority=?, due_date=?, due_time=?
+            WHERE id=? AND user_id=?
+        """, (name, category, priority, due_date, due_time, task_id, current_user.id))
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for("dashboard"))
+
+    task = conn.execute("""
+        SELECT * FROM tasks
+        WHERE id=? AND user_id=?
+    """, (task_id, current_user.id)).fetchone()
+
+    conn.close()
+    return render_template("edit_task.html", task=task)
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
-    tasks = conn.execute(
-        "SELECT * FROM tasks WHERE user_id=? ORDER BY due_date, due_time",
-        (current_user.id,)
-    ).fetchall()
+
+    tasks = conn.execute("""
+        SELECT * FROM tasks
+        WHERE user_id=?
+    """, (current_user.id,)).fetchall()
+
     conn.close()
-    return render_template("dashboard.html", tasks=tasks)
+
+    total = len(tasks)
+    done = 0
+    pending = 0
+    overdue = 0
+
+    now = datetime.now()
+
+    for task in tasks:
+        if task["status"] == "Done":
+            done += 1
+        else:
+            pending += 1
+            task_datetime = datetime.strptime(
+                task["due_date"] + " " + task["due_time"],
+                "%Y-%m-%d %H:%M"
+            )
+            if task_datetime < now:
+                overdue += 1
+
+    return render_template(
+        "dashboard.html",
+        tasks=tasks,
+        total=total,
+        done=done,
+        pending=pending,
+        overdue=overdue
+    )
 
 @app.route("/logout")
 @login_required
@@ -110,6 +187,33 @@ def add_task():
         return redirect(url_for("dashboard"))
 
     return render_template("add_task.html")
+
+@app.route("/overdue")
+@login_required
+def overdue():
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+
+    tasks = conn.execute("""
+        SELECT * FROM tasks
+        WHERE user_id=? AND status='Pending'
+    """, (current_user.id,)).fetchall()
+
+    conn.close()
+
+    overdue_tasks = []
+    now = datetime.now()
+
+    for task in tasks:
+        task_datetime = datetime.strptime(
+            task["due_date"] + " " + task["due_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+        if task_datetime < now:
+            overdue_tasks.append(task)
+
+    return render_template("overdue.html", tasks=overdue_tasks)
 
         
 def create_tables():
