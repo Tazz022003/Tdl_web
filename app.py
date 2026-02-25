@@ -1,9 +1,13 @@
 
 from flask import Flask
+from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask import render_template, request, redirect, url_for
 from datetime import datetime
-from flask import request
+import sqlite3
+#from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+#from flask import render_template, request, redirect, url_for
+from datetime import datetime
+#from flask import request
 import sqlite3
 
 
@@ -119,46 +123,53 @@ def edit(task_id):
     conn.close()
     return render_template("edit_task.html", task=task)
 
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
+    search = request.args.get("search")
+    category = request.args.get("category")
+
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
 
-    tasks = conn.execute("""
-        SELECT * FROM tasks
-        WHERE user_id=?
-    """, (current_user.id,)).fetchall()
+    query = "SELECT * FROM tasks WHERE user_id=?"
+    params = [current_user.id]
 
+    if search:
+        query += " AND name LIKE ?"
+        params.append(f"%{search}%")
+
+    if category and category != "All":
+        query += " AND category=?"
+        params.append(category)
+
+    # Sort by nearest due date
+    query += " ORDER BY due_date ASC, due_time ASC"
+
+    tasks = conn.execute(query, params).fetchall()
     conn.close()
 
+    # Separate Pending and Done
+    pending_tasks = [t for t in tasks if t["status"] == "Pending"]
+    done_tasks = [t for t in tasks if t["status"] == "Done"]
+
     total = len(tasks)
-    done = 0
-    pending = 0
-    overdue = 0
-
-    now = datetime.now()
-
-    for task in tasks:
-        if task["status"] == "Done":
-            done += 1
-        else:
-            pending += 1
-            task_datetime = datetime.strptime(
-                task["due_date"] + " " + task["due_time"],
-                "%Y-%m-%d %H:%M"
-            )
-            if task_datetime < now:
-                overdue += 1
+    pending = len(pending_tasks)
+    done = len(done_tasks)
 
     return render_template(
         "dashboard.html",
-        tasks=tasks,
+        pending_tasks=pending_tasks,
+        done_tasks=done_tasks,
         total=total,
         done=done,
         pending=pending,
-        overdue=overdue
+        overdue=0
     )
+   
+   
+    
 
 @app.route("/logout")
 @login_required
@@ -214,6 +225,7 @@ def overdue():
             overdue_tasks.append(task)
 
     return render_template("overdue.html", tasks=overdue_tasks)
+
 
         
 def create_tables():
