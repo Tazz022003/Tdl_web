@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Analytics</h2>
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3">
+    Back to Dashboard
+</a>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card text-white bg-primary p-3">
+            Total Tasks: {{ total }}
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-white bg-success p-3">
+            Done: {{ done }}
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-white bg-warning p-3">
+            Pending: {{ pending }}
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-white bg-danger p-3">
+            Overdue: {{ overdue }}
+        </div>
+    </div>
+</div>
+
+<!-- Pie Chart -->
+<div class="card p-4">
+    <canvas id="taskChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('taskChart');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Done', 'Pending'],
+        datasets: [{
+            data: [{{ done|tojson }}, {{ pending|tojson }}],
+            backgroundColor: [
+                'green',
+                'orange'
+            ]
+        }]
+    }
+});
+</script>
+
+{% endblock %}

@@ -4,6 +4,7 @@
 <h2>Dashboard</h2>
 <a href="{{ url_for('add_task') }}" class="btn btn-success mb-3">Add New Task</a>
 <a href="{{ url_for('overdue') }}" class="btn btn-danger mb-3">View Overdue</a>
+<a href="{{ url_for('analytics')}}" class="btn btn-info mb-3"> View Analytics</a>
 
 
 <form method="GET" action="{{ url_for('dashboard') }}" class="mb-3">
@@ -68,7 +69,7 @@
 </tr>
 
 {% for task in pending_tasks %}
-<tr class="table-warning">
+<tr class="table-warning fade-row">
     <td>{{ task.name }}</td>
     <td>{{ task.category }}</td>
     <td>{{ task.priority }}</td>
@@ -76,13 +77,23 @@
     <td>{{ task.due_time }}</td>
     <td>{{ task.status }}</td>
     <td>
-        <a href="{{ url_for('done', task_id=task.id) }}" class="btn btn-sm btn-success">✔ Done</a>
-        <a href="{{ url_for('edit', task_id=task.id) }}" class="btn btn-sm btn-primary">✏ Edit</a>
-        <a href="{{ url_for('delete', task_id=task.id) }}"
-           class="btn btn-sm btn-danger"
-           onclick="return confirm('Delete this task?')">
-           🗑 Delete
-        </a>
+
+        <a href="{{ url_for('done', task_id=task.id) }}"
+   class="btn btn-sm btn-success action-btn">
+   ✔ Done
+</a>
+
+<a href="{{ url_for('edit', task_id=task.id) }}"
+   class="btn btn-sm btn-primary">
+   ✏ Edit
+</a>
+
+<a href="{{ url_for('delete', task_id=task.id) }}"
+   class="btn btn-sm btn-danger action-btn"
+   onclick="return confirm('Delete this task?')">
+   🗑 Delete
+</a>
+        
     </td>
 </tr>
 {% endfor %}
@@ -100,7 +111,7 @@
 </tr>
 
 {% for task in done_tasks %}
-<tr class="table-success">
+<tr class="table-success fade-row">
     <td>{{ task.name }}</td>
     <td>{{ task.category }}</td>
     <td>{{ task.priority }}</td>
@@ -108,13 +119,33 @@
     <td>{{ task.due_time }}</td>
     <td>{{ task.status }}</td>
     <td>
-        <a href="{{ url_for('delete', task_id=task.id) }}"
-           class="btn btn-sm btn-danger"
-           onclick="return confirm('Delete this task?')">
-           🗑 Delete
-        </a>
+            <a href="{{ url_for('undo', task_id=task.id) }}"
+               class="btn btn-sm btn-warning action-btn">
+              ↩ Undo
+            </a>
+        
+            <a href="{{ url_for('delete', task_id=task.id) }}"
+               class="btn btn-sm btn-danger"
+               onclick="return confirm('Delete this task?')">
+               🗑 Delete
+            </a>
+        
     </td>
 </tr>
 {% endfor %}
 </table>
+<script>
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+    
+            const row = this.closest('tr');
+            row.classList.add('fade-out');
+    
+            setTimeout(() => {
+                window.location.href = this.href;
+            }, 300);
+        });
+    });
+    </script>
 {% endblock %}

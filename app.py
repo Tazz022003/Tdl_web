@@ -77,6 +77,19 @@ def done(task_id):
     conn.close()
     return redirect(url_for("dashboard"))
 
+@app.route("/undo/<int:task_id>")
+@login_required
+def undo(task_id):
+    conn = sqlite3.connect("database.db")
+    conn.execute(
+        "UPDATE tasks SET status='Pending' WHERE id=? AND user_id=?",
+        (task_id, current_user.id)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("dashboard"))
+
 @app.route("/delete/<int:task_id>")
 @login_required
 def delete(task_id):
@@ -226,7 +239,43 @@ def overdue():
 
     return render_template("overdue.html", tasks=overdue_tasks)
 
+@app.route("/analytics")
+@login_required
+def analytics():
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
 
+    tasks = conn.execute("""
+        SELECT * FROM tasks
+        WHERE user_id=?
+    """, (current_user.id,)).fetchall()
+
+    conn.close()
+
+    total = len(tasks)
+    done = len([t for t in tasks if t["status"] == "Done"])
+    pending = len([t for t in tasks if t["status"] == "Pending"])
+
+    # Count overdue
+    overdue = 0
+    now = datetime.now()
+
+    for task in tasks:
+        if task["status"] == "Pending":
+            task_datetime = datetime.strptime(
+                task["due_date"] + " " + task["due_time"],
+                "%Y-%m-%d %H:%M"
+            )
+            if task_datetime < now:
+                overdue += 1
+
+    return render_template(
+        "analytics.html",
+        total=total,
+        done=done,
+        pending=pending,
+        overdue=overdue
+    )
         
 def create_tables():
     conn = sqlite3.connect("database.db")
