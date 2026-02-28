@@ -3,6 +3,7 @@ from flask import Flask
 from flask import Flask, render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
+from flask import flash
 import sqlite3
 #from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 #from flask import render_template, request, redirect, url_for
@@ -72,9 +73,14 @@ def login():
 @login_required
 def done(task_id):
     conn = sqlite3.connect("database.db")
-    conn.execute("UPDATE tasks SET status='Done' WHERE id=? AND user_id=?", (task_id, current_user.id))
+    conn.execute(
+        "UPDATE tasks SET status='Done' WHERE id=? AND user_id=?",
+        (task_id, current_user.id)
+    )
     conn.commit()
     conn.close()
+
+    flash("Task marked as Done!", "success")   # ← ITO DAPAT
     return redirect(url_for("dashboard"))
 
 @app.route("/undo/<int:task_id>")
@@ -88,6 +94,7 @@ def undo(task_id):
     conn.commit()
     conn.close()
 
+    flash("Task moved back to pending!!!", "warning")
     return redirect(url_for("dashboard"))
 
 @app.route("/delete/<int:task_id>")
@@ -103,6 +110,7 @@ def delete(task_id):
     conn.commit()
     conn.close()
 
+    flash("Task deleted succesfully!!!","danger")
     return redirect(url_for("dashboard"))
 
 @app.route("/edit/<int:task_id>", methods=["GET", "POST"])
