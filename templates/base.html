@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+
+      
         .fade-row {
             transition: opacity 0.3s ease, transform 0.3s ease;
             animation: fadeIn 0.4s ease-in-out;
@@ -28,6 +30,39 @@
                 transform: translateY(0);
             }
         }
+
+        /* Smooth transition */
+        body {
+           transition: background 0.3s ease, color 0.3s ease;
+        }
+
+/* Dark Mode Styles */
+        body.dark-mode {
+           background-color: #121212;
+           color: #ffffff;
+        }
+
+        body.dark-mode .navbar {
+           background-color: #1e1e1e !important;
+        }
+
+        body.dark-mode .card,
+        body.dark-mode .table {
+    background-color: #1e1e1e;
+    color: #ffffff;
+        }
+
+        body.dark-mode .form-control,
+        body.dark-mode .form-select {
+           background-color: #2a2a2a;
+           color: white;
+           border-color: #444;
+           }
+
+        body.dark-mode .btn-outline-dark {
+           color: white;
+           border-color: white;
+        }
     </style>
 </head>
 
@@ -37,7 +72,15 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('dashboard') }}">TDL App</a>
     <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
+    
+        <!-- Dark Mode Toggle -->
+        <li class="nav-item me-3">
+            <button id="darkModeToggle" class="btn btn-sm btn-outline-dark">
+                🌙
+            </button>
+        </li>
+    
         {% if current_user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
@@ -59,6 +102,8 @@
 </nav>
 
 <div class="container">
+
+  
 
   <!-- Toast Container -->
   <div class="toast-container position-fixed top-0 end-0 p-3">
@@ -90,14 +135,52 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const toggleBtn = document.getElementById("darkModeToggle");
+  
+  // Load saved preference
+  if (localStorage.getItem("darkMode") === "enabled") {
+      document.body.classList.add("dark-mode");
+      toggleBtn.textContent = "☀️";
+  }
+  
+  // Toggle click
+  toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+  
+      if (document.body.classList.contains("dark-mode")) {
+          localStorage.setItem("darkMode", "enabled");
+          toggleBtn.textContent = "☀️";
+      } else {
+          localStorage.setItem("darkMode", "disabled");
+          toggleBtn.textContent = "🌙";
+      }
+  });
+  </script>
 
 <!-- Auto Show Toast -->
-<script>
-document.querySelectorAll('.toast').forEach(toastEl => {
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
-});
-</script>
 
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll('.toast').forEach(toastEl => {
+          const toast = new bootstrap.Toast(toastEl);
+          toast.show();
+  
+          if (toastEl.classList.contains('bg-success')) {
+              const sound = document.getElementById("doneSound");
+              if (sound) {
+                  sound.currentTime = 0;
+                  sound.play().catch(() => {});
+              }
+          }
+      });
+  });
+  </script>
+  
+  
+  <audio id="doneSound"
+src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"
+preload="auto"></audio>
 </body>
 </html>
