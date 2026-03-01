@@ -1,23 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>Dashboard</h2>
-<a href="{{ url_for('add_task') }}" class="btn btn-success mb-3">Add New Task</a>
-<a href="{{ url_for('overdue') }}" class="btn btn-danger mb-3">View Overdue</a>
-<a href="{{ url_for('analytics')}}" class="btn btn-info mb-3"> View Analytics</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">Dashboard</h2>
+        <medium class="text-muted">Manage your productivity efficiently kahit na tamad ka!!!</medium>
+    </div>
+</div>
 
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{{ url_for('add_task') }}" class="btn btn-success">
+        Add New Task
+    </a>
+    <a href="{{ url_for('overdue') }}" class="btn btn-danger">
+        View Overdue
+    </a>
+    <a href="{{ url_for('analytics')}}" class="btn btn-info text-white">
+        View Analytics
+    </a>
+</div>
 
-<form method="GET" action="{{ url_for('dashboard') }}" class="mb-3">
-    <div class="row">
+<form method="GET" action="{{ url_for('dashboard') }}" class="mb-4">
+    <div class="row g-2">
 
-        <div class="col-md-5">
+        <div class="col-12 col-md-5">
             <input type="text" name="search" class="form-control"
                    placeholder="Search task name..."
                    value="{{ request.args.get('search', '') }}">
         </div>
 
-        <div class="col-md-4">
-            <select name="category" class="form-control">
+        <div class="col-12 col-md-4">
+            <select name="category" class="form-select">
                 <option value="All">All Categories</option>
                 <option value="School">School</option>
                 <option value="Work">Work</option>
@@ -25,7 +38,7 @@
             </select>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <button class="btn btn-primary w-100" type="submit">
                 Search / Filter
             </button>
@@ -34,30 +47,41 @@
     </div>
 </form>
 
-<div class="row mb-4">
-    <div class="col">
-        <div class="card text-white bg-primary p-3">
-            Total Tasks: {{ total }}
+<!-- Stats Cards -->
+<div class="row text-center mb-4 g-3">
+    <div class="col-6 col-md-3">
+        <div class="stats-card gradient-blue shadow-soft">
+            <h6>Total Tasks</h6>
+            <h2>{{ total }}</h2>
         </div>
     </div>
-    <div class="col">
-        <div class="card text-white bg-success p-3">
-            Done: {{ done }}
+
+    <div class="col-6 col-md-3">
+        <div class="stats-card gradient-green shadow-soft">
+            <h6>Done</h6>
+            <h2>{{ done }}</h2>
         </div>
     </div>
-    <div class="col">
-        <div class="card text-white bg-warning p-3">
-            Pending: {{ pending }}
+
+    <div class="col-6 col-md-3">
+        <div class="stats-card gradient-yellow shadow-soft">
+            <h6>Pending</h6>
+            <h2>{{ pending }}</h2>
         </div>
     </div>
-    <div class="col">
-        <div class="card text-white bg-danger p-3">
-            Overdue: {{ overdue }}
+
+    <div class="col-6 col-md-3">
+        <div class="stats-card gradient-red shadow-soft">
+            <h6>Overdue</h6>
+            <h2>{{ overdue }}</h2>
         </div>
     </div>
 </div>
+
+<!-- Pending Tasks -->
 <h4>Pending Tasks</h4>
-<table class="table table-bordered">
+<div class="table-responsive mb-4">
+<table class="table align-middle bg-white shadow-soft">
 <tr>
     <th>Task</th>
     <th>Category</th>
@@ -76,30 +100,34 @@
     <td>{{ task.due_date }}</td>
     <td>{{ task.due_time }}</td>
     <td>{{ task.status }}</td>
-    <td>
+    <td class="d-flex justify-content-center gap-2">
 
         <a href="{{ url_for('done', task_id=task.id) }}"
-   class="btn btn-sm btn-success action-btn">
-   ✔ Done
-</a>
-
-<a href="{{ url_for('edit', task_id=task.id) }}"
-   class="btn btn-sm btn-primary">
-   ✏ Edit
-</a>
-
-<a href="{{ url_for('delete', task_id=task.id) }}"
-   class="btn btn-sm btn-danger action-btn"
-   onclick="return confirm('Delete this task?')">
-   🗑 Delete
-</a>
+           class="btn btn-success btn-sm px-3">
+           ✔
+        </a>
         
-    </td>
+        <a href="{{ url_for('edit', task_id=task.id) }}"
+           class="btn btn-primary btn-sm px-3">
+           ✏
+        </a>
+        
+        <a href="{{ url_for('delete', task_id=task.id) }}"
+           class="btn btn-danger btn-sm px-3"
+           onclick="return confirm('Delete this task?')">
+           🗑
+        </a>
+        
+        </td>
 </tr>
 {% endfor %}
 </table>
-<h4 class="mt-5">Completed Tasks</h4>
-<table class="table table-bordered">
+</div>
+
+<!-- Completed Tasks -->
+<h4 class="mt-4">Completed Tasks</h4>
+<div class="table-responsive">
+<table class="table align-middle bg-white shadow-soft">
 <tr>
     <th>Task</th>
     <th>Category</th>
@@ -118,34 +146,34 @@
     <td>{{ task.due_date }}</td>
     <td>{{ task.due_time }}</td>
     <td>{{ task.status }}</td>
-    <td>
-            <a href="{{ url_for('undo', task_id=task.id) }}"
-               class="btn btn-sm btn-warning action-btn">
-              ↩ Undo
-            </a>
+    <td class="d-flex flex-wrap justify-content-center gap-1">
+        <a href="{{ url_for('undo', task_id=task.id) }}"
+           class="btn btn-sm btn-warning action-btn">
+           ↩
+        </a>
         
-            <a href="{{ url_for('delete', task_id=task.id) }}"
-               class="btn btn-sm btn-danger"
-               onclick="return confirm('Delete this task?')">
-               🗑 Delete
-            </a>
-        
+        <a href="{{ url_for('delete', task_id=task.id) }}"
+           class="btn btn-sm btn-danger"
+           onclick="return confirm('Delete this task?')">
+           🗑
+        </a>
     </td>
 </tr>
 {% endfor %}
 </table>
+</div>
+
 <script>
-    document.querySelectorAll('.action-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-    
-            const row = this.closest('tr');
-            row.classList.add('fade-out');
-    
-            setTimeout(() => {
-                window.location.href = this.href;
-            }, 300);
-        });
+document.querySelectorAll('.action-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const row = this.closest('tr');
+        row.classList.add('fade-out');
+        setTimeout(() => {
+            window.location.href = this.href;
+        }, 300);
     });
-    </script>
+});
+</script>
+
 {% endblock %}

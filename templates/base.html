@@ -2,12 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TDL Web App</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        
+        table th {
+             background: #f9fafb;
+             font-weight: 600;
+        }
+
+        table td {
+             vertical-align: middle;
+        }
+
+        table tbody tr {
+             transition: 0.2s ease;
+        }
+
+        table tbody tr:hover {
+             background: #f1f5f9;
+        }
+
+        body {
+             background: #f4f6f9;
+        }
+
+        .card {
+             border: none;
+             border-radius: 16px;
+        }
+
+        .table {
+              border-radius: 16px;
+              overflow: hidden;
+        }
+
+          .btn {
+             border-radius: 10px;
+        }
+
+        .shadow-soft {
+             box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+        }
+
+        .stats-card {
+             border-radius: 18px;
+             padding: 20px;
+             color: white;
+             transition: 0.3s ease;
+        }
+
+         .stats-card:hover {
+             transform: translateY(-5px);
+        }
+
+        .gradient-blue {
+             background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .gradient-green {
+            background: linear-gradient(135deg, #22c55e, #15803d);
+        }
+
+        .gradient-yellow {
+            background: linear-gradient(135deg, #facc15, #eab308);
+            color: #333;
+        }
+
+        .gradient-red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
 
       
         .fade-row {
@@ -32,9 +101,25 @@
         }
 
         /* Smooth transition */
-        body {
+        /*body {
            transition: background 0.3s ease, color 0.3s ease;
-        }
+        }*/
+        
+        /*body {
+           min-height: 100vh;
+           background: linear-gradient(135deg, #667eea, #764ba2);
+           background-attachment: fixed;
+        }*/
+        /*body {
+    min-height: 100vh;
+    background: linear-gradient(to right, #f8fafc, #e2e8f0);
+}*/         
+body {
+    min-height: 100vh;
+    background: url("{{ url_for('static', filename='images/bg.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+}
+
 
 /* Dark Mode Styles */
         body.dark-mode {
@@ -67,13 +152,19 @@
 </head>
 
 <body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('dashboard') }}">TDL App</a>
+  
+      <button class="navbar-toggler" type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+  
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{{ url_for('dashboard') }}">TDL App</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto align-items-center">
-    
         <!-- Dark Mode Toggle -->
         <li class="nav-item me-3">
             <button id="darkModeToggle" class="btn btn-sm btn-outline-dark">
