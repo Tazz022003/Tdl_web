@@ -5,9 +5,11 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from datetime import datetime
 from flask import flash
 import sqlite3
+import csv
+from flask import Response
 #from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 #from flask import render_template, request, redirect, url_for
-from datetime import datetime
+from datetime import date, datetime
 #from flask import request
 import sqlite3
 
@@ -145,6 +147,7 @@ def edit(task_id):
     return render_template("edit_task.html", task=task)
 
 
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -165,19 +168,36 @@ def dashboard():
         query += " AND category=?"
         params.append(category)
 
-    # Sort by nearest due date
     query += " ORDER BY due_date ASC, due_time ASC"
 
     tasks = conn.execute(query, params).fetchall()
     conn.close()
 
-    # Separate Pending and Done
-    pending_tasks = [t for t in tasks if t["status"] == "Pending"]
-    done_tasks = [t for t in tasks if t["status"] == "Done"]
+    now = datetime.now()
+
+    pending_tasks = []
+    done_tasks = []
+    overdue_tasks = []
+
+    for t in tasks:
+        due_datetime = datetime.strptime(
+            f"{t['due_date']} {t['due_time']}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        if t["status"] == "Done":
+            done_tasks.append(t)
+
+        elif due_datetime < now:
+            overdue_tasks.append(t)
+
+        else:
+            pending_tasks.append(t)
 
     total = len(tasks)
     pending = len(pending_tasks)
     done = len(done_tasks)
+    overdue = len(overdue_tasks)
 
     return render_template(
         "dashboard.html",
@@ -186,10 +206,12 @@ def dashboard():
         total=total,
         done=done,
         pending=pending,
-        overdue=0
+        overdue=overdue
+    
+    
+
+        
     )
-   
-   
     
 
 @app.route("/logout")
@@ -246,6 +268,34 @@ def overdue():
             overdue_tasks.append(task)
 
     return render_template("overdue.html", tasks=overdue_tasks)
+
+
+@app.route("/export")
+@login_required
+def export_tasks():
+
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row
+
+    tasks = conn.execute(
+        "SELECT name, category, priority, due_date, due_time, status FROM tasks WHERE user_id=?",
+        (current_user.id,)
+    ).fetchall()
+
+    conn.close()
+
+    def generate():
+        data = csv.writer(open("tasks.csv", "w", newline=""))
+        yield "Task,Category,Priority,Due Date,Due Time,Status\n"
+
+        for task in tasks:
+            yield f"{task['name']},{task['category']},{task['priority']},{task['due_date']},{task['due_time']},{task['status']}\n"
+
+    return Response(
+        generate(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment;filename=tasks.csv"}
+    )
 
 @app.route("/analytics")
 @login_required
